@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Cloud To-Do List</title>
+    <style>
+        /* Базовые стили для демонстрации */
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        form { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background: #fafafa; }
+        input[type="text"], textarea { width: calc(100% - 22px); padding: 10px; margin: 5px 0 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #5cb85c; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #4cae4c; }
+        .task-list { list-style: none; padding: 0; }
+        .task-card { 
+            display: flex; 
+            align-items: center; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            border: 1px solid #eee; 
+            border-left: 5px solid #007bff; 
+            border-radius: 4px; 
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+        .task-content { flex-grow: 1; margin-right: 15px; }
+        .task-content h3 { margin: 0 0 5px 0; font-size: 1.1em; }
+        .task-done { border-left-color: #5cb85c; opacity: 0.6; }
+        .task-done h3, .task-done p { text-decoration: line-through; color: #777; }
+        .flash { padding: 10px; margin-bottom: 15px; border-radius: 4px; font-weight: bold; }
+        .flash.error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .flash.success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        
+        /* Стиль для ошибки пустого поля под кнопкой */
+        #error-output { color: #a94442; font-weight: bold; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cloud To-Do List</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form id="add-task-form" method="POST" action="{{ url_for('add_task') }}">
+            <h2>Добавить Новую Задачу</h2>
+            <label for="title">Заголовок Задачи:</label>
+            <input type="text" id="title" name="title" placeholder="Краткий заголовок" required>
+            
+            <label for="description">Описание Задачи:</label>
+            <textarea id="description" name="description" rows="3" placeholder="Подробное описание задачи..." required></textarea>
+            
+            <button type="submit">Создать Задачу</button>
+            
+            <div id="error-output">
+                🚫 Ошибка: Заполните оба поля. Задача не создана.
+            </div>
+        </form>
+
+        <h2>Список Задач</h2>
+        <ul class="task-list">
+            {% if tasks %}
+                {% for task in tasks %}
+                    <li class="task-card {% if task.is_done %}task-done{% endif %}">
+                        <div class="task-content">
+                            <h3>{{ task.title }}</h3>
+                            <p>{{ task.description }}</p>
+                        </div>
+                        
+                        <input 
+                            type="checkbox" 
+                            name="is_done" 
+                            data-task-id="{{ task.id }}"
+                            {% if task.is_done %}checked{% endif %}
+                            onchange="updateTaskStatus(this)"
+                        >
+                    </li>
+                {% endfor %}
+            {% else %}
+                <p>Нет активных задач. Начните с добавления новой!</p>
+            {% endif %}
+        </ul>
+    </div>
+
+    <script>
+        // Валидация на стороне клиента (по требованию)
+        document.getElementById('add-task-form').addEventListener('submit', function(event) {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const errorOutput = document.getElementById('error-output');
+
+            if (title === '' || description === '') {
+                event.preventDefault(); // Останавливаем отправку формы
+                errorOutput.style.display = 'block'; // Показываем ошибку
+            } else {
+                errorOutput.style.display = 'none'; // Скрываем, если все ОК
+            }
+        });
+
+        // Функция для отправки запроса в Cloud Function при изменении чекбокса
+        function updateTaskStatus(checkbox) {
+            const taskId = checkbox.getAttribute('data-task-id');
+            const isDone = checkbox.checked;
+            
+            // !!! ВАЖНО: URL Cloud Function нужно заменить на реальный после развертывания !!!
+            const CLOUD_FUNCTION_URL = 'https://us-central1-cloud-task-manager-474405.cloudfunctions.net/updateTaskStatus';
+
+            fetch(CLOUD_FUNCTION_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: taskId,
+                    is_done: isDone
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Сбой обновления статуса');
+                }
+                // Для мгновенного визуального обновления
+                const card = checkbox.closest('.task-card');
+                if (isDone) {
+                    card.classList.add('task-done');
+                } else {
+                    card.classList.remove('task-done');
+                }
+                console.log(`Задача ${taskId} обновлена: ${isDone}`);
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                // Откатываем чекбокс в случае ошибки
+                checkbox.checked = !isDone; 
+                alert('Не удалось обновить статус задачи. Проверьте Cloud Function.');
+            });
+        }
+    </script>
+</body>
+</html>
