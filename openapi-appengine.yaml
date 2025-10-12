@@ -1,0 +1,41 @@
+swagger: "2.0"
+info:
+  title: Cloud Task Manager
+  description: A To-Do website deployed on Google Cloud
+  version: 0.1.0
+host: starting-with-python-473014.appspot.com
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /:
+    get:
+      summary: Main page
+      operationId: main
+      description: Here you can find To-Do list tasks
+      responses:
+        200:
+          description: OK
+  /add:
+    post:
+      summary: Add new task
+      operationId: add
+      parameters:
+        - in: body
+          name: New task
+          schema:
+            type: object
+            required:
+              - title
+              - description
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+      responses:
+        201:
+          description: Created task
