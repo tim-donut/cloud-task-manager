@@ -1,6 +1,6 @@
 # main_appengine.py
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from google.cloud import datastore # Изменяем импорт
 from datetime import datetime
 
@@ -44,10 +44,16 @@ def index():
 # ------------------------------------
 @app.route('/add', methods=['POST'])
 def add_task():
-    # !!! НЕДОСТАЮЩИЙ КОД: Получение данных из формы !!!
-    title = request.form.get('title', '').strip()
-    description = request.form.get('description', '').strip()
-    # !!! КОНЕЦ НЕДОСТАЮЩЕГО КОДА !!!
+
+    # Отправка на форму по правилам REST API должна быть в виде JSON файлов (которому данный сайт не следует).
+    # Для введения документации OpenAPI необходимо добавить принятие JSON файлов.
+    if request.is_json:
+        data = request.get_json()
+        title = data.get('title', '').strip()
+        description = data.get('description', '').strip()
+    else:
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
     
     # Проверка на пустое поле
     if not title or not description:
@@ -74,7 +80,22 @@ def add_task():
     except Exception as e:
         flash(f"❌ Критическая ошибка при сохранении задачи: {e}", "error")
 
+    # Возврат ответа для OpenAPI в виде JSON файла.
+    if request.is_json:
+        created_task = dict(new_task)
+        created_task['id'] = new_task.key.id
+        return created_task, 201
     return redirect(url_for('index'))
+
+@app.route('/docs')
+def get_docs():
+    """Отображает страницу документации."""
+    return render_template('docs.html')
+
+@app.route('/openapi-appengine.yaml')
+def get_api_spec():
+    """Возвращает OpenAPI спецификацию"""
+    return send_from_directory('.', 'openapi-appengine.yaml')
 
 if __name__ == '__main__':
     # Используется только для локального запуска
