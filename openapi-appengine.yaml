@@ -3,7 +3,10 @@ info:
   title: Cloud Task Manager
   description: A To-Do website deployed on Google Cloud
   version: 0.1.0
-host: starting-with-python-473014.appspot.com
+# !!! ВАЖНО !!! Введите URL своего endpoint
+# В отличие от URL приложения, например starting-with-python-473014.uc.r.appspot.com, он оканчивается на appspot.com без региональных подробностей
+# (вместо uc.r.appspot.com просто appspot.com)
+host: [PROJECT_ID].appspot.com
 schemes:
   - https
 consumes:
