@@ -1,7 +1,8 @@
 runtime: python311
 entrypoint: gunicorn -b :$PORT main_appengine:app
 
-instance_class: F1 
-handlers:
-- url: /.*
-  script: auto
+endpoints_api_service:
+# !!! ВАЖНО !!! Введите URL своего endpoint
+# Данная команда подключает ESPv2 (Extensible Service Provider v2) для мониторинга Endpoints
+  name: [PROJECT_ID].appspot.com
+  rollout_strategy: managed
