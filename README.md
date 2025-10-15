@@ -117,7 +117,7 @@ locust -f locustfile.py
     
     * Перейдите во вкладку **Security -> Identity-Aware Proxy (IAP)**
     * Включите IAP для вашего проекта
-    * Нажмите на троеточие справа от вашего проекта -> **Settings**
+    * Нажмите на троеточие справа от имени вашего проекта -> **Settings** (прокрутите если не видно)
     * Выберите **Custom OAuth** и в разделе **Custom client ID and secret** нажмите **Auto Genereate Credentials**. Сохраните
 
     После выполненных шагов:
@@ -126,7 +126,7 @@ locust -f locustfile.py
     * Выберите **OAuth 2.0 Client ID** сгенерированный вами (IAP-App-Engine-app).
     * В раздел **Authorized JavaScript origins** добавьте URL адрес вашего проекта.
 
-    Далее необходимо перейти в папку вашего проекта и развернуть endpoint:
+    Далее необходимо перейти в папку вашего проекта и развернуть endpoint (перед этим замените URL в файле openapi-appengine.yaml):
     ```bash
     gcloud endpoints services deploy openapi-appengine.yaml
     ```
