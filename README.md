@@ -126,6 +126,14 @@ locust -f locustfile.py
     * Выберите **OAuth 2.0 Client ID** сгенерированный вами (IAP-App-Engine-app).
     * В раздел **Authorized JavaScript origins** добавьте URL адрес вашего проекта.
 
+    Выдайте право на использование IAP вашему проекту (IAP-secured Web App user). Для этого:
+    * Нажмите на ваш проект на главной странице (справа от Google Cloud)
+    * Выберите иконку папки с шестеренкой (менеджер проектов)
+    * Выберите **Show Info Panel** справа в верхнем углу
+    * Выберите ваш проект
+    * Нажмите **Add Principal** (укажите свою почту)
+    * В **Select a role** найдите **IAP-serured Web App user**
+    
     Далее необходимо перейти в папку вашего проекта и развернуть endpoint (перед этим замените URL в файле openapi-appengine.yaml):
     ```bash
     gcloud endpoints services deploy openapi-appengine.yaml
