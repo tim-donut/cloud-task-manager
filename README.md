@@ -134,7 +134,7 @@ locust -f locustfile.py
     * Нажмите **Add Principal** (укажите свою почту)
     * В **Select a role** найдите **IAP-serured Web App user**
     
-    Далее необходимо перейти в папку вашего проекта и развернуть endpoint (перед этим замените URL в файле openapi-appengine.yaml, а также в app.yaml проекта):
+    Далее необходимо перейти в папку вашего проекта и развернуть endpoint (перед этим замените URL в файле openapi-appengine.yaml):
     ```bash
     gcloud endpoints services deploy openapi-appengine.yaml
     ```
