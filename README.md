@@ -150,6 +150,51 @@ locust -f locustfile.py
 
     * Данный Cloud Endpoint позволяет вам зайти на сайт с авторизованным токеном (Oauth 2.0 Client ID).
     * Теперь вы можете перейти во вкладку /docs вашего проекта через данный endpoint (https://[CLOUD_ENDPOINT_URL]/docs) для введения OpenAPI документации.
+      
+6. Для деплоя в Kubernetes замените PROJECT_ID на ваш собственный (выбранный регион для деплоя us-central1):
+   
+   Для Windows:
+   ```bash
+   $Env:PROJECT_ID=[your_project_id]
+   $Env:REGION=us-central1
+   
+   docker build --build-arg ADC=$Env:APPDATA/gcloud/application_default_credentials.json -t $Env:REGION-docker.pkg.dev/$Env:PROJECT_ID/gae-standard/flask-app .
+   
+   docker push $Env:REGION-docker.pkg.dev/$Env:PROJECT_ID/gae-standard/flask-app
+   
+   gcloud container clusters create-auto hello-cluster
+   
+   gcloud container clusters get-credentials hello-cluster --location=$Env:REGION
+   
+   kubectl create deployment flask-app --image=$Env:REGION-docker.pkg.dev/$Env:PROJECT_ID/gae-standard/flask-app
+   
+   kubectl expose deployment flask-app --name=flask-app-service --type=LoadBalancer --port 80 --target-port 8080
+   ```
+
+   Для MacOS:
+   ```bash
+   export PROJECT_ID=[your_project_id]
+   export REGION=us-central1
+   
+   docker build --build-arg ADC=~/gcloud/application_default_credentials.json -t $REGION-docker.pkg.dev/$PROJECT_ID/gae-standard/flask-app .
+   
+   docker push $REGION-docker.pkg.dev/$PROJECT_ID/gae-standard/flask-app
+   
+   gcloud container clusters create-auto hello-cluster
+   
+   gcloud container clusters get-credentials hello-cluster --location=$REGION
+   
+   kubectl create deployment flask-app --image=$REGION-docker.pkg.dev/$PROJECT_ID/gae-standard/flask-app
+   
+   kubectl expose deployment flask-app --name=flask-app-service --type=LoadBalancer --port 80 --target-port 8080
+   ```
+   Для Linux замените аргумент первой команды (ADC) на $HOME/.config/gcloud/application_default_credentials.json.
+
+   Для получения списка задеплоенных сервисов выполните:
+   ```bash
+   kubectl get service
+   ```
+   Данная команда покажется вами задеплоенный "flask-app-service". Перейдите по EXTERNAL_IP чтобы увидеть ваш сервис задеплоенный в глобальный интернет.
 ---
 
 ## 👨‍💻 Как Пользоваться
