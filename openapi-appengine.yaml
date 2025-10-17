@@ -3,16 +3,23 @@ info:
   title: Cloud Task Manager
   description: A To-Do website deployed on Google Cloud
   version: 0.1.0
-# !!! ВАЖНО !!! Введите URL своего endpoint
-# В отличие от URL приложения, например starting-with-python-473014.uc.r.appspot.com, он оканчивается на appspot.com без региональных подробностей
-# (вместо uc.r.appspot.com просто appspot.com)
-host: [PROJECT_ID].appspot.com
+
+# -----------------------------
+# ВАЖНО:
+# Укажите URL своего endpoint.
+# В отличие от URL приложения в формате <project>-<region>.uc.r.appspot.com,
+# используйте URL, оканчивающийся на appspot.com (без региональных подробностей)
+# Например: my-todo-app.appspot.com
+# -----------------------------
+host: "YOUR_APP_URL_HERE"  # <- замените на свой appspot.com URL
 schemes:
   - https
+
 consumes:
   - application/json
 produces:
   - application/json
+
 paths:
   /:
     get:
@@ -22,13 +29,16 @@ paths:
       responses:
         200:
           description: OK
+
   /add:
     post:
       summary: Add new task
       operationId: add
+      description: Create a new task in the To-Do list
       parameters:
         - in: body
           name: New task
+          description: Task object to be created
           schema:
             type: object
             required:
@@ -37,8 +47,27 @@ paths:
             properties:
               title:
                 type: string
+                example: "Buy groceries"
               description:
                 type: string
+                example: "Milk, eggs, bread"
       responses:
         201:
           description: Created task
+        400:
+          description: Bad request
+
+# -----------------------------
+# Настройка аутентификации через Google OAuth2
+# Для шаблона оставляем универсальные placeholders.
+# Пользователь должен подставить свой client ID и issuer
+# -----------------------------
+securityDefinitions:
+  google_id_token:
+    authorizationUrl: ""
+    flow: "implicit"
+    type: "oauth2"
+    x-google-issuer: "accounts.google.com"
+    x-google-jwks_uri: "https://www.googleapis.com/oauth2/v3/certs"
+    x-google-audiences: "YOUR_CLIENT_ID_HERE"  # <- замените на свой OAuth Client ID
+

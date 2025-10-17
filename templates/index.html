@@ -109,7 +109,7 @@
             const isDone = checkbox.checked;
             
             // !!! ВАЖНО: URL Cloud Function нужно заменить на реальный после развертывания !!!
-            const CLOUD_FUNCTION_URL = 'https://us-central1-starting-with-python-473014.cloudfunctions.net/updateTaskStatus';
+            const CLOUD_FUNCTION_URL = 'https://us-central1-kbtu-cloud-dev-us.cloudfunctions.net/updateTaskStatus';
 
             fetch(CLOUD_FUNCTION_URL, {
                 method: 'POST',

@@ -3,6 +3,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from google.cloud import datastore # Изменяем импорт
 from datetime import datetime
+from google.auth.exceptions import DefaultCredentialsError
 
 app = Flask(__name__)
 # В реальном приложении: app.secret_key должен быть секретным и храниться в Secret Manager
@@ -10,7 +11,10 @@ app.secret_key = 'super_secret_key_for_flash'
 
 # Инициализация клиента Firestore
 # Автоматически использует учетные данные среды App Engine
-client = datastore.Client() # Изменяем инициализацию
+try:
+    client = datastore.Client()# Изменяем инициализацию
+except DefaultCredentialsError:
+    client = None # При локальных тестах клиент будет отключен
 ENTITY_KIND = 'Task' # В Datastore сущности называются Kind (Тип)
 
 # ------------------------------------
@@ -57,24 +61,27 @@ def add_task():
     
     # Проверка на пустое поле
     if not title or not description:
-        # В соответствии с требованием: "выводи ошибка пустого поля"
-        flash("🚫 Ошибка: Оба поля (Заголовок и Текст) должны быть заполнены.", "error")
+        message = "🚫 Ошибка: Оба поля (Заголовок и Текст) должны быть заполнены."
+        if request.is_json:
+            return {"error": message}, 400  
+        flash(message, "error")
         return redirect(url_for('index'))
     
+    new_task = None
     try:
         # Создаем новую сущность Datastore
-        key = client.key(ENTITY_KIND)
-        new_task = datastore.Entity(key)
-        
-        new_task.update({
-            'title': title,
-            'description': description,
-            'is_done': False,
-            'created_at': datetime.utcnow()
-        })
-        
-        client.put(new_task) # Сохраняем
-        
+        if client:
+            key = client.key(ENTITY_KIND)
+            new_task = datastore.Entity(key)
+            new_task.update({
+                'title': title,
+                'description': description,
+                'is_done': False,
+                'created_at': datetime.utcnow()
+            })
+            client.put(new_task)
+        else:
+            new_task = {'title': title, 'description': description, 'is_done': False}
         flash(f"✅ Задача '{title}' успешно добавлена!", "success")
         
     except Exception as e:
@@ -82,8 +89,8 @@ def add_task():
 
     # Возврат ответа для OpenAPI в виде JSON файла.
     if request.is_json:
-        created_task = dict(new_task)
-        created_task['id'] = new_task.key.id
+        created_task = dict(new_task) if new_task else {}
+        created_task['id'] = getattr(getattr(new_task, 'key', None), 'id', None)
         return created_task, 201
     return redirect(url_for('index'))
 
