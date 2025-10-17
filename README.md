@@ -70,7 +70,7 @@
 * **Анализ:** Отслеживаются **Requests per second (RPS)** и **среднее время ответа (Latency)** для оценки производительности GKE и Cloud Functions при пиковой нагрузке.
 * Для запуска тестирования
 ```bash
-locust -f locustfile.py
+python -m locust -f locustfile.py
 ```
 ---
 
