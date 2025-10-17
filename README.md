@@ -148,7 +148,7 @@ python -m locust -f locustfile.py
     ```bash
     cd cloud-function-update-task/ 
     gcloud functions deploy updateTaskStatus \
-      --runtime python311 \
+      --runtime python312 \
       --trigger-http \
       --allow-unauthenticated \
       --source .
