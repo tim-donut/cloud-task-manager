@@ -151,7 +151,7 @@ locust -f locustfile.py
     * Данный Cloud Endpoint позволяет вам зайти на сайт с авторизованным токеном (Oauth 2.0 Client ID).
     * Теперь вы можете перейти во вкладку /docs вашего проекта через данный endpoint (https://[CLOUD_ENDPOINT_URL]/docs) для введения OpenAPI документации.
       
-6. Для деплоя в Kubernetes замените PROJECT_ID на ваш собственный (выбранный регион для деплоя us-central1):
+6. Для деплоя в Google Kubernetes Engine (GKE) замените PROJECT_ID на ваш собственный (выбранный регион для деплоя us-central1). GKE распознает в какой репозиторий деплоить код по тегам Docker:
    
    Для Windows:
    ```bash
